@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Reggles44/secli/cmd/lookup"
+	"github.com/Reggles44/secli/src/config"
 	"github.com/spf13/cobra"
 )
 
@@ -25,12 +27,12 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(config.InitConfig)
 
 	// RootCmd Flags
 	rootCmd.PersistentFlags().Bool("test", true, "Set testing mode")
-	rootCmd.PersistentFlags().StringVar("test", true, "Set testing mode")
+	// rootCmd.PersistentFlags().StringVar("test", true, "Set testing mode")
 
 	// Add Sub Commands
-	rootCmd.AddCommand(lookup.lookupCmd)
+	rootCmd.AddCommand(lookup.LookupCmd)
 }
