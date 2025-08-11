@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	TickerIndex      map[string]float64
-	CompanyNameIndex map[string]float64
+	TickerIndex      map[string]int
+	CompanyNameIndex map[string]int
 )
 
 var (
@@ -25,8 +25,8 @@ type IndexFile struct {
 }
 
 func init() {
-	TickerIndex = make(map[string]float64)
-	CompanyNameIndex = make(map[string]float64)
+	TickerIndex = make(map[string]int)
+	CompanyNameIndex = make(map[string]int)
 
 	// If the file does *NOT* exist
 	if _, err := os.Stat(tmp_file); errors.Is(err, os.ErrNotExist) {
@@ -86,7 +86,7 @@ func load() error {
 	}
 
 	for _, companyData := range indexFile.Data {
-		cik := companyData[0].(float64)
+		cik := int(companyData[0].(float64))
 		name := companyData[1].(string)
 		ticker := companyData[2].(string)
 

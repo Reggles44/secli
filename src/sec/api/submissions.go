@@ -3,11 +3,15 @@ package secapi
 import "fmt"
 
 
-const baseSubmissionURL string = "https://data.sec.gov/submissions/CIK%v.json"
+const baseSubmissionURL string = "https://data.sec.gov/submissions/CIK%010d.json"
 
-func GetSubmissions(cik float64) error {
+func GetSubmissions(cik int) error {
 	fmt.Printf("HELP cik=%v\n", cik)
-	resp, err := Request("GET", fmt.Sprintf(baseSubmissionURL, cik), nil)
+
+	url := fmt.Sprintf(baseSubmissionURL, cik)
+	fmt.Printf("HELP url=%v\n", url)
+
+	resp, err := Request("GET", url, nil)
 	if err != nil {
 		return err
 	}
