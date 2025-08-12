@@ -3,6 +3,7 @@ package secapi
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 )
 
 const baseSubmissionURL string = "https://data.sec.gov/submissions/CIK%010d.json"
@@ -34,16 +35,16 @@ type Submission struct {
 			StateOrCountry            string `json:"stateOrCountry"`
 			ZipCode                   string `json:"zipCode"`
 			StateOrCountryDescription string `json:"stateOrCountryDescription"`
-			IsForeignLocation         string `json:"isForeignLocation"`
+			IsForeignLocation         int8   `json:"isForeignLocation"`
 			ForeignStateTerritory     string `json:"foreignStateTerritory"`
 			Country                   string `json:"country"`
 			CountryCode               string `json:"countryCode"`
 		} `json:"mailing"`
 		Business struct{} `json:"business"`
 	} `json:"addresses"`
-	Phone       string `json:"phone"`
-	Flags       string `json:"flags"`
-	FormerNames string `json:"formerNames"`
+	Phone       string   `json:"phone"`
+	Flags       string   `json:"flags"`
+	FormerNames []string `json:"formerNames"`
 	Filings     struct {
 		Recent struct {
 			AccessionNumber       []string `json:"accessionNumber"`
@@ -57,14 +58,14 @@ type Submission struct {
 			Items                 []string `json:"items"`
 			Core_type             []string `json:"core_type"`
 			Size                  []int64  `json:"size"`
-			IsXBRL                []bool   `json:"isXBRL"`
-			IsInlineXBRL          []bool   `json:"isInlineXBRL"`
-			PrimaryDocument       string   `json:"primaryDocument"`
-			PrimaryDocDescription string   `json:"primaryDocDescription"`
+			IsXBRL                []int8   `json:"isXBRL"`
+			IsInlineXBRL          []int8   `json:"isInlineXBRL"`
+			PrimaryDocument       []string `json:"primaryDocument"`
+			PrimaryDocDescription []string `json:"primaryDocDescription"`
 		} `json:"recent"`
 		Files []struct {
 			Name        string `json:"name"`
-			FilingCount int64 `json:"filingCount"`
+			FilingCount int64  `json:"filingCount"`
 			FilingFrom  string `json:"filingFrom"`
 			FilingTo    string `json:"filingTo"`
 		} `json:"files"`
@@ -84,8 +85,11 @@ func GetSubmissions(cik int) error {
 	var submission Submission
 	err = json.Unmarshal(*data, &submission)
 	if err != nil {
-		return err
+		log.Panic(err)
 	}
+
+	// for _, filing := range submission.Fil
+	// fmt.Println(submission.Tickers)
 
 	return nil
 }
