@@ -2,11 +2,6 @@ package secapi
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
-	"log"
-	"os"
 )
 
 var (
@@ -28,61 +23,13 @@ func init() {
 	TickerIndex = make(map[string]int)
 	CompanyNameIndex = make(map[string]int)
 
-	// If the file does *NOT* exist
-	if _, err := os.Stat(tmp_file); errors.Is(err, os.ErrNotExist) {
-		err := download()
-		if err != nil {
-			os.Remove(tmp_file)
-		}
-	}
-
-	err := load()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func download() error {
-	fmt.Println("Downloading sec indicies")
-
-	resp, err := Request("GET", index_url, nil)
-	if err != nil {
-		return err
-	}
-
-	// Creat File
-	file, err := os.Create(tmp_file)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func load() error {
-	// Open file
-	file, err := os.Open(tmp_file)
-	if err != nil {
-		return err
-	}
-
-	// Read file
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return err
-	}
+	data, err := Request("GET", index_url, nil, true, 86400)
 
 	// Write to Companies
 	var indexFile IndexFile
-	err = json.Unmarshal(data, &indexFile)
+	err = json.Unmarshal(*data, &indexFile)
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	for _, companyData := range indexFile.Data {
@@ -93,5 +40,4 @@ func load() error {
 		TickerIndex[ticker] = cik
 		CompanyNameIndex[name] = cik
 	}
-	return nil
 }
