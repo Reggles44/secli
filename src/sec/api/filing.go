@@ -17,3 +17,12 @@ type Filing struct {
 	PrimaryDocument       string `json:"primaryDocument"`
 	PrimaryDocDescription string `json:"primaryDocDescription"`
 }
+
+func getFilings(submission *Submission) (*[]Filing, error) {
+	var filings []Filing
+	for i , filingNumber:= range submission.Filings.Recent.FilingNumber {
+		filings = append(filings, Filing{})	
+	}
+
+	return *filings
+}
