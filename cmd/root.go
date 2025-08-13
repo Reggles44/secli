@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Reggles44/secli/cmd/lookup"
+	"github.com/Reggles44/secli/cmd/preload"
 	"github.com/spf13/cobra"
 )
 
@@ -34,4 +35,5 @@ func init() {
 
 	// Add Sub Commands
 	rootCmd.AddCommand(lookup.LookupCmd)
+	rootCmd.AddCommand(preload.PreloadCmd)
 }

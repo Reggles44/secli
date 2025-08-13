@@ -6,16 +6,15 @@ import (
 	secapi "github.com/Reggles44/secli/src/sec/api"
 )
 
-func Find(search *string) error {
+func Find(search *string) (*secapi.Submission, error) {
 	cik, ok := secapi.TickerIndex[*search]
 	if !ok {
 		cik, ok = secapi.CompanyNameIndex[*search]
 	}
 
 	if !ok {
-		return errors.New("Company not found")
+		return nil, errors.New("company not found")
 	}
 
-	secapi.GetSubmissions(cik)
-	return nil
+	return secapi.GetSubmission(cik)
 }

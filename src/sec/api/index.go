@@ -24,6 +24,9 @@ func init() {
 	CompanyNameIndex = make(map[string]int)
 
 	data, err := Request("GET", index_url, nil, true, 86400)
+	if err != nil {
+		panic(err)
+	}
 
 	// Write to Companies
 	var indexFile IndexFile

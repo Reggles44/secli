@@ -72,12 +72,12 @@ type Submission struct {
 	} `json:"filings"`
 }
 
-func GetSubmissions(cik int) error {
+func GetSubmission(cik int) (*Submission, error) {
 	url := fmt.Sprintf(baseSubmissionURL, cik)
 
 	data, err := Request("GET", url, nil, false, 0)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	fmt.Println(string(*data))
@@ -88,8 +88,5 @@ func GetSubmissions(cik int) error {
 		log.Panic(err)
 	}
 
-	// for _, filing := range submission.Fil
-	// fmt.Println(submission.Tickers)
-
-	return nil
+	return &submission, nil
 }
