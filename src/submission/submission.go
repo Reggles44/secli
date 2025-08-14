@@ -1,4 +1,4 @@
-package secapi
+package submission
 
 import (
 	"encoding/json"
@@ -80,7 +80,7 @@ func GetSubmission(cik int) (*Submission, error) {
 		return nil, err
 	}
 
-	fmt.Println(string(*data))
+	// fmt.Println(string(*data))
 
 	var submission Submission
 	err = json.Unmarshal(*data, &submission)

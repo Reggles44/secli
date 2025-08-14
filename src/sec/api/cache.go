@@ -30,7 +30,7 @@ func writeToCache(fileName string, content *[]byte) error {
 	}
 
 	// Create File
-	file, err := os.Create(tmp_file)
+	file, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}

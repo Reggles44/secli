@@ -9,10 +9,7 @@ var (
 	CompanyNameIndex map[string]int
 )
 
-var (
-	index_url = "https://www.sec.gov/files/company_tickers_exchange.json"
-	tmp_file  = "/tmp/company_tickers_exchange.json"
-)
+var index_url = "https://www.sec.gov/files/company_tickers_exchange.json"
 
 type IndexFile struct {
 	Fields []string `json:"fields"`
