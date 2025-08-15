@@ -8,8 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var outputFields bool = false
+
 var LookupCmd = &cobra.Command{
-	Use:  "lookup [company or ticker] [form]",
+	Use:  "lookup [company or ticker] [tag]",
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		company, err := company.Find(&args[0])
@@ -17,11 +19,25 @@ var LookupCmd = &cobra.Command{
 			panic(err)
 		}
 
-		data, err := json.Marshal(company)
+		if outputFields {
+			for key := range company.Facts.USGaap {
+				fmt.Println(key)
+			}
+			return
+		}
+
+		// fmt.Println(company.EntityName)
+
+		facts := company.Facts.USGaap[args[1]]
+		data, err := json.Marshal(facts)
 		if err != nil {
 			panic(err)
 		}
 
 		fmt.Println(string(data))
 	},
+}
+
+func init() {
+	LookupCmd.Flags().BoolVar(&outputFields, "fields", false, "Outputs available fields")
 }

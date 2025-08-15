@@ -10,14 +10,30 @@ import (
 var companyFactsURL string = "https://data.sec.gov/api/xbrl/companyfacts/CIK%010d.json"
 
 type Company struct {
-	CIK        int       `json:"cik"`
+	CIK        int          `json:"cik"`
 	EntityName string       `json:"entityName"`
 	Facts      CompanyFacts `json:"facts"`
 }
 
 type CompanyFacts struct {
-	DEI    struct{} `json:"dei"`
-	USGaap struct{} `json:"us-gaap"`
+	DEI    map[string]Fact `json:"dei"`
+	USGaap map[string]Fact `json:"us-gaap"`
+}
+
+type Fact struct {
+	Description string             `json:"description"`
+	Label       string             `json:"label"`
+	Units       map[string][]Value `json:"units"`
+}
+
+type Value struct {
+	ACCN         string  `json:"accn"`
+	PeriodEnd    string  `json:"end"`
+	FiledDate    string  `json:"filed"`
+	Form         string  `json:"form"`
+	FilingPeriod string  `json:"fp"`
+	FilingYear   int     `json:"fy"`
+	Value        float64 `json:"val"`
 }
 
 func getCompany(cik int) (*Company, error) {
