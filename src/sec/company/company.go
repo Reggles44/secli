@@ -2,6 +2,7 @@ package company
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	secapi "github.com/Reggles44/secli/src/sec/api"
@@ -50,4 +51,16 @@ func getCompany(cik int) (*Company, error) {
 	}
 
 	return &company, nil
+}
+
+func (fact Fact) FindValue(filedDate string, form string) (float64, error) {
+
+	for _, value := range fact.Units["USD"] {
+		if value.FiledDate == filedDate && value.Form == form {
+			return value.Value , nil
+		}
+	}
+
+	return nil, errors.New("No value found")
+	
 }

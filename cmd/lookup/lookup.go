@@ -11,7 +11,7 @@ import (
 var outputFields bool = false
 
 var LookupCmd = &cobra.Command{
-	Use:  "lookup [company or ticker] [tag]",
+	Use:  "lookup [search] [tag]",
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		company, err := company.Find(&args[0])
