@@ -1,7 +1,9 @@
-package secapi
+package sec
 
 import (
 	"encoding/json"
+
+	"github.com/Reggles44/secli/internal/request"
 )
 
 var (
@@ -9,28 +11,28 @@ var (
 	CompanyNameIndex map[string]int
 )
 
-var index_url = "https://www.sec.gov/files/company_tickers_exchange.json"
-
-type IndexFile struct {
-	Fields []string `json:"fields"`
-	Data   [][]any  `json:"data"`
-}
+var (
+	indexUrl      = "https://www.sec.gov/files/company_tickers_exchange.json"
+	cacheDuration = 86400
+)
 
 func init() {
 	TickerIndex = make(map[string]int)
 	CompanyNameIndex = make(map[string]int)
 
-	data, err := Request("GET", index_url, nil, true, 86400)
+	resp, err := request.Get("GET", indexUrl, cacheDuration)
 	if err != nil {
 		panic(err)
 	}
 
 	// Write to Companies
-	var indexFile IndexFile
-	err = json.Unmarshal(*data, &indexFile)
+	var jsonData interface{}
+	err = json.Unmarshal(*resp, &jsonData)
 	if err != nil {
 		panic(err)
 	}
+
+	data, ok := jsonData["data"]
 
 	for _, companyData := range indexFile.Data {
 		cik := int(companyData[0].(float64))
@@ -41,3 +43,4 @@ func init() {
 		CompanyNameIndex[name] = cik
 	}
 }
+

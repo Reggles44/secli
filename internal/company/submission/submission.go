@@ -1,4 +1,4 @@
-package submission
+package companysubmission
 
 import (
 	"encoding/json"
@@ -90,3 +90,4 @@ func GetSubmission(cik int) (*Submission, error) {
 
 	return &submission, nil
 }
+

@@ -1,11 +1,11 @@
-package company
+package facts
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 
-	secapi "github.com/Reggles44/secli/src/sec/api"
+	"github.com/Reggles44/secli/internal/request"
 )
 
 var companyFactsURL string = "https://data.sec.gov/api/xbrl/companyfacts/CIK%010d.json"
@@ -39,7 +39,7 @@ type Value struct {
 
 func getCompany(cik int) (*Company, error) {
 	url := fmt.Sprintf(companyFactsURL, cik)
-	data, err := secapi.Request("GET", url, nil, true, 86400)
+	data, err := request.Get("GET", url, 86400)
 	if err != nil {
 		return nil, err
 	}
@@ -54,13 +54,11 @@ func getCompany(cik int) (*Company, error) {
 }
 
 func (fact Fact) FindValue(filedDate string, form string) (float64, error) {
-
 	for _, value := range fact.Units["USD"] {
 		if value.FiledDate == filedDate && value.Form == form {
-			return value.Value , nil
+			return value.Value, nil
 		}
 	}
 
 	return nil, errors.New("No value found")
-	
 }
