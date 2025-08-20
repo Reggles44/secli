@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TODO: Create requests per second limitation
 func Get(method string, url string, cacheDuration int) (*[]byte, error) {
 	// If cache exists and we should NOT reset the cache
 	// Return the content of the cache
