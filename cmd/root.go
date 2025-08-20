@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Reggles44/secli/cmd/debug"
 	"github.com/Reggles44/secli/cmd/lookup"
 	"github.com/Reggles44/secli/cmd/preload"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var rootCmd = &cobra.Command{
@@ -30,10 +32,11 @@ func init() {
 	// cobra.OnInitialize(config.InitConfig)
 
 	// RootCmd Flags
-	rootCmd.PersistentFlags().Bool("test", true, "Set testing mode")
-	// rootCmd.PersistentFlags().StringVar("test", true, "Set testing mode")
+	rootCmd.PersistentFlags().Bool("debug", false, "Enable debug")
+	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 
 	// Add Sub Commands
+	rootCmd.AddCommand(debug.DebugCmd)
 	rootCmd.AddCommand(lookup.LookupCmd)
 	rootCmd.AddCommand(preload.PreloadCmd)
 }

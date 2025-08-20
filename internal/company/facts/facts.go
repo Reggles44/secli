@@ -1,20 +1,16 @@
-package facts
+package companyfacts
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 
-	"github.com/Reggles44/secli/internal/request"
+	"github.com/Reggles44/secli/internal/utils/request"
 )
 
-var companyFactsURL string = "https://data.sec.gov/api/xbrl/companyfacts/CIK%010d.json"
-
-type Company struct {
-	CIK        int          `json:"cik"`
-	EntityName string       `json:"entityName"`
-	Facts      CompanyFacts `json:"facts"`
-}
+var (
+	companyFactsURL           = "https://data.sec.gov/api/xbrl/companyfacts/CIK%010d.json"
+	companyFactsCacheDuration = 86400
+)
 
 type CompanyFacts struct {
 	DEI    map[string]Fact `json:"dei"`
@@ -37,28 +33,18 @@ type Value struct {
 	Value        float64 `json:"val"`
 }
 
-func getCompany(cik int) (*Company, error) {
+func Get(cik int) (CompanyFacts, error) {
 	url := fmt.Sprintf(companyFactsURL, cik)
-	data, err := request.Get("GET", url, 86400)
+	data, err := request.Get("GET", url, companyFactsCacheDuration)
 	if err != nil {
-		return nil, err
+		return CompanyFacts{}, nil
 	}
 
-	var company Company
+	var company CompanyFacts
 	err = json.Unmarshal(*data, &company)
 	if err != nil {
-		return nil, err
+		return CompanyFacts{}, nil
 	}
 
-	return &company, nil
-}
-
-func (fact Fact) FindValue(filedDate string, form string) (float64, error) {
-	for _, value := range fact.Units["USD"] {
-		if value.FiledDate == filedDate && value.Form == form {
-			return value.Value, nil
-		}
-	}
-
-	return nil, errors.New("No value found")
+	return company, nil
 }

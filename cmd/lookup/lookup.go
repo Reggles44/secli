@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Reggles44/secli/src/sec/company"
+	"github.com/Reggles44/secli/internal/company"
 	"github.com/spf13/cobra"
 )
 
@@ -14,30 +14,31 @@ var LookupCmd = &cobra.Command{
 	Use:  "lookup [search] [tag]",
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		company, err := company.Find(&args[0])
+		company, err := company.Find(args[0])
 		if err != nil {
 			panic(err)
 		}
 
-		if outputFields {
-			for key := range company.Facts.USGaap {
-				fmt.Println(key)
-			}
-			return
-		}
+		// fmt.Println(company.CIK)
 
-		// fmt.Println(company.EntityName)
-
-		facts := company.Facts.USGaap[args[1]]
-		data, err := json.Marshal(facts)
+		submissions, err := company.LatestSubmission()
 		if err != nil {
 			panic(err)
 		}
+		
 
-		fmt.Println(string(data))
+		filings := submissions.GetFilings("10-K")
+
+		// fd, _ := json.Marshal(filings)
+		// fmt.Println(string(fd))
+
+		for _, filing := range filings {
+			fstring, _ := json.Marshal(filing)
+			fmt.Println(string(fstring))
+		}
 	},
 }
 
 func init() {
-	LookupCmd.Flags().BoolVar(&outputFields, "fields", false, "Outputs available fields")
+	LookupCmd.Flags().BoolVar(&outputFields, "", false, "Outputs available fields")
 }

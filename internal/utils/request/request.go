@@ -32,7 +32,7 @@ func Get(method string, url string, cacheDuration int) (*[]byte, error) {
 	req.Header.Add("User-Agent", fmt.Sprintf("%s %s", "SEC CLI Tool", "reginaldbeakes@gmail.com"))
 
 	// Debug Request
-	if viper.GetBool("DEBUG") {
+	if viper.GetBool("debug") {
 		reqDump, err := httputil.DumpRequestOut(req, true)
 		if err != nil {
 			log.Fatal(err)
@@ -48,7 +48,7 @@ func Get(method string, url string, cacheDuration int) (*[]byte, error) {
 	defer resp.Body.Close()
 
 	// Debug Response
-	if viper.GetBool("DEBUG") {
+	if viper.GetBool("debug") {
 		respDump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
 			log.Fatal(err)

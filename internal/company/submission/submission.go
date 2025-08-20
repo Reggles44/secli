@@ -3,12 +3,17 @@ package companysubmission
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+
+	"github.com/Reggles44/secli/internal/company/filing"
+	"github.com/Reggles44/secli/internal/utils/request"
 )
 
-const baseSubmissionURL string = "https://data.sec.gov/submissions/CIK%010d.json"
+var (
+	companySubmissionUrl           = "https://data.sec.gov/submissions/CIK%010d.json"
+	companySubmissionCacheDuration = 0
+)
 
-type Submission struct {
+type CompanySubmissions struct {
 	Cik                               string   `json:"cik"`
 	EntityType                        string   `json:"entityType"`
 	SIC                               string   `json:"sic"`
@@ -53,7 +58,7 @@ type Submission struct {
 			AcceptanceDateTime    []string `json:"acceptanceDateTime"`
 			Act                   []string `json:"act"`
 			Form                  []string `json:"form"`
-			FilingNumber          []string `json:"filingNumber"`
+			FileNumber            []string `json:"fileNumber"`
 			FilmNumber            []string `json:"filmNumber"`
 			Items                 []string `json:"items"`
 			Core_type             []string `json:"core_type"`
@@ -72,22 +77,46 @@ type Submission struct {
 	} `json:"filings"`
 }
 
-func GetSubmission(cik int) (*Submission, error) {
-	url := fmt.Sprintf(baseSubmissionURL, cik)
-
-	data, err := Request("GET", url, nil, false, 0)
+func Get(cik int) (CompanySubmissions, error) {
+	url := fmt.Sprintf(companySubmissionUrl, cik)
+	data, err := request.Get("GET", url, companySubmissionCacheDuration)
 	if err != nil {
-		return nil, err
+		return CompanySubmissions{}, err
 	}
 
-	// fmt.Println(string(*data))
+	var submission CompanySubmissions
+	json.Unmarshal(*data, &submission)
 
-	var submission Submission
-	err = json.Unmarshal(*data, &submission)
-	if err != nil {
-		log.Panic(err)
-	}
-
-	return &submission, nil
+	return submission, nil
 }
 
+func (s CompanySubmissions) GetFilings(formSearch string) []filing.Filing {
+	var filings []filing.Filing
+
+	for i, form := range s.Filings.Recent.Form {
+		if form == formSearch {
+
+			f := filing.Filing{
+				AccessionNumber:       s.Filings.Recent.AccessionNumber[i],
+				FilingDate:            s.Filings.Recent.FilingDate[i],
+				ReportDate:            s.Filings.Recent.ReportDate[i],
+				AcceptanceDateTime:    s.Filings.Recent.AcceptanceDateTime[i],
+				Act:                   s.Filings.Recent.Act[i],
+				Form:                  form,
+				FileNumber:            s.Filings.Recent.FileNumber[i],
+				FilmNumber:            s.Filings.Recent.FilmNumber[i],
+				Items:                 s.Filings.Recent.Items[i],
+				Core_type:             s.Filings.Recent.Core_type[i],
+				Size:                  s.Filings.Recent.Size[i],
+				IsXBRL:                s.Filings.Recent.IsXBRL[i],
+				IsInlineXBRL:          s.Filings.Recent.IsInlineXBRL[i],
+				PrimaryDocument:       s.Filings.Recent.PrimaryDocument[i],
+				PrimaryDocDescription: s.Filings.Recent.PrimaryDocDescription[i],
+			}
+			filings = append(filings, f)
+
+		}
+	}
+
+	return filings
+}
