@@ -22,15 +22,30 @@ func MakeUrl(tpl template.Template, data any) string {
 
 // TODO: Create requests per second limitation
 func Get(method string, url string, cacheDuration int) (*[]byte, error) {
-	// If cache exists and we should NOT reset the cache
-	// Return the content of the cache
-	cacheFileName := path.Base(url)
-	if cacheDuration != 0 {
-		if !cache.Expired(cacheFileName, cacheDuration) {
-			return cache.Read(cacheFileName)
+	// Read from cache
+	data, err := cache.Read(cacheFilePath, cacheDuration)
+	
+	// If we could not read from cache
+	if err != nil {
+
+		// Fetch data
+		data, err := execute(method, url)
+		if err != nil {
+			return nil, err
 		}
+
+		// Write to cache
+		go cache.Write(cacheFileName, data)
 	}
 
+	return data, nil
+}
+
+func DownloadFile(method string, url string) (string, error) {
+	if cache.
+}
+
+func execute(method string, url string) (*[]byte, error) {
 	// Create Request
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
@@ -68,11 +83,6 @@ func Get(method string, url string, cacheDuration int) (*[]byte, error) {
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
-	}
-
-	// Write to cache
-	if cacheDuration != 0 {
-		go cache.Write(cacheFileName, &data)
 	}
 
 	return &data, nil

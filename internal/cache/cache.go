@@ -9,30 +9,13 @@ import (
 
 var cachedDir string = "/tmp/secli/"
 
-func Path(fileName string) string {
+func CacheFilePath(fileName string) string {
 	return path.Join(cachedDir, fileName)
-}
-
-func Expired(fileName string, cache int) bool {
-	filePath := Path(fileName)
-	info, err := os.Stat(filePath)
-	// File does not exit
-	if err != nil {
-		return true
-	}
-
-	// Cache can be set to -1 to make it permanent
-	if cache < 0 {
-		return false
-	}
-
-	// Difference between ModTime and Now compared to cacheDuration
-	return time.Until(info.ModTime()) >= time.Duration(cache)
 }
 
 func Write(fileName string, content *[]byte) error {
 	// File exists
-	filePath := Path(fileName)
+	filePath := CacheFilePath(fileName)
 	_, err := os.Stat(filePath)
 	if !errors.Is(err, os.ErrNotExist) {
 		return nil
@@ -54,12 +37,17 @@ func Write(fileName string, content *[]byte) error {
 	return nil
 }
 
-func Read(fileName string) (*[]byte, error) {
+func Read(fileName string, cacheDuration int) (*[]byte, error) {
 	// File does not exit
-	filePath := Path(fileName)
-	_, err := os.Stat(filePath)
+	filePath := CacheFilePath(fileName)
+	fileInfo, err := os.Stat(filePath)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, err
+	}
+
+	if time.Until(fileInfo.ModTime()) >= time.Duration(cacheDuration) {
+		os.Remove(filePath)
+		return nil, errors.New("cache expired")
 	}
 
 	// Read File
