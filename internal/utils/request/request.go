@@ -42,7 +42,7 @@ func Get(method string, url string, cacheDuration int) (*[]byte, error) {
 }
 
 func DownloadFile(method string, url string) (string, error) {
-	if cache.
+	data, err := cache.Read(cacheFilePath, -1)
 }
 
 func execute(method string, url string) (*[]byte, error) {
