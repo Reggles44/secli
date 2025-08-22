@@ -32,17 +32,18 @@ type FilingMeta struct {
 	PrimaryDocDescription string
 }
 
-type FilingData struct {
-	
-	
-}
+type FilingData struct{}
 
-func (f FilingMeta) GetFile() (*[]byte, error) {
-	url := fmt.Sprintf(filingUrl, f.CIK, strings.Replace(f.AccessionNumber, "-", "", -1), f.PrimaryDocument)
-	data, err := request.Get("GET", url, filingCacheDuration)
+func (f FilingMeta) GetFilingDocuments() (*[]byte, error) {
+	url := fmt.Sprintf(filingUrl, f.CIK, strings.ReplaceAll(f.AccessionNumber, "-", ""), f.PrimaryDocument)
+	files, err := request.GetZip("GET", url, filingCacheDuration)
 	if err != nil {
 		return nil, err
 	}
 
-	return 
+	for fileName := range files {
+		fmt.Println(fileName)
+	}
+
+	return nil, nil
 }

@@ -1,9 +1,6 @@
 package lookup
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/Reggles44/secli/internal/company"
 	"github.com/spf13/cobra"
 )
@@ -35,8 +32,10 @@ var LookupCmd = &cobra.Command{
 		// fmt.Println(string(fd))
 
 		for _, filing := range filings {
-			fstring, _ := json.Marshal(filing)
-			fmt.Println(string(fstring))
+			_, err := filing.GetFilingDocuments()
+			if err != nil {
+				panic(err)
+			}
 		}
 	},
 }

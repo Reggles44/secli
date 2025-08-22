@@ -113,6 +113,7 @@ func (s CompanySubmissions) GetFilings(formSearch string) []filing.FilingMeta {
 			}
 
 			f := filing.FilingMeta{
+				CIK:                   s.Cik,
 				AccessionNumber:       s.Filings.Recent.AccessionNumber[i],
 				FilingDate:            filingDate,
 				ReportDate:            reportDate,

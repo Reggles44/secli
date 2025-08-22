@@ -9,8 +9,12 @@ import (
 
 var cachedDir string = "/tmp/secli/"
 
+func Path(fileName string) string {
+	return path.Join(cachedDir, fileName)
+}
+
 func Expired(fileName string, cache int) bool {
-	filePath := path.Join(cachedDir, fileName)
+	filePath := Path(fileName)
 	info, err := os.Stat(filePath)
 	// File does not exit
 	if err != nil {
@@ -28,7 +32,7 @@ func Expired(fileName string, cache int) bool {
 
 func Write(fileName string, content *[]byte) error {
 	// File exists
-	filePath := path.Join(cachedDir, fileName)
+	filePath := Path(fileName)
 	_, err := os.Stat(filePath)
 	if !errors.Is(err, os.ErrNotExist) {
 		return nil
@@ -52,7 +56,7 @@ func Write(fileName string, content *[]byte) error {
 
 func Read(fileName string) (*[]byte, error) {
 	// File does not exit
-	filePath := path.Join(cachedDir, fileName)
+	filePath := Path(fileName)
 	_, err := os.Stat(filePath)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, err
