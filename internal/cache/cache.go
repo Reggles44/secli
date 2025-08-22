@@ -17,6 +17,11 @@ func Expired(fileName string, cache int) bool {
 		return true
 	}
 
+	// Cache can be set to -1 to make it permanent
+	if cache < 0 {
+		return false
+	}
+
 	// Difference between ModTime and Now compared to cacheDuration
 	return time.Until(info.ModTime()) >= time.Duration(cache)
 }

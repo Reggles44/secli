@@ -1,7 +1,9 @@
 package request
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -11,6 +13,12 @@ import (
 	"github.com/Reggles44/secli/internal/cache"
 	"github.com/spf13/viper"
 )
+
+func MakeUrl(tpl template.Template, data any) string {
+	var buf bytes.Buffer
+	tpl.Execute(&buf, data)
+	return buf.String()
+}
 
 // TODO: Create requests per second limitation
 func Get(method string, url string, cacheDuration int) (*[]byte, error) {

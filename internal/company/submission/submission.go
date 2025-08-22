@@ -3,6 +3,8 @@ package companysubmission
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
+	"time"
 
 	"github.com/Reggles44/secli/internal/company/filing"
 	"github.com/Reggles44/secli/internal/utils/request"
@@ -90,17 +92,31 @@ func Get(cik int) (CompanySubmissions, error) {
 	return submission, nil
 }
 
-func (s CompanySubmissions) GetFilings(formSearch string) []filing.Filing {
-	var filings []filing.Filing
+func (s CompanySubmissions) GetFilings(formSearch string) []filing.FilingMeta {
+	var filings []filing.FilingMeta
 
 	for i, form := range s.Filings.Recent.Form {
 		if form == formSearch {
+			filingDate, err := time.Parse("2006-01-02", s.Filings.Recent.FilingDate[i])
+			if err != nil {
+				continue
+			}
 
-			f := filing.Filing{
+			reportDate, err := time.Parse("2006-01-02", s.Filings.Recent.ReportDate[i])
+			if err != nil {
+				continue
+			}
+
+			acceptanceDateTime, err := time.Parse("2006-01-02T15:04:05.000Z", s.Filings.Recent.AcceptanceDateTime[i])
+			if err != nil {
+				continue
+			}
+
+			f := filing.FilingMeta{
 				AccessionNumber:       s.Filings.Recent.AccessionNumber[i],
-				FilingDate:            s.Filings.Recent.FilingDate[i],
-				ReportDate:            s.Filings.Recent.ReportDate[i],
-				AcceptanceDateTime:    s.Filings.Recent.AcceptanceDateTime[i],
+				FilingDate:            filingDate,
+				ReportDate:            reportDate,
+				AcceptanceDateTime:    acceptanceDateTime,
 				Act:                   s.Filings.Recent.Act[i],
 				Form:                  form,
 				FileNumber:            s.Filings.Recent.FileNumber[i],
@@ -117,6 +133,10 @@ func (s CompanySubmissions) GetFilings(formSearch string) []filing.Filing {
 
 		}
 	}
+
+	sort.Slice(filings, func(i int, j int) bool {
+		return filings[i].FilingDate.Before(filings[j].FilingDate)
+	})
 
 	return filings
 }

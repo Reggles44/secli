@@ -14,7 +14,10 @@ var LookupCmd = &cobra.Command{
 	Use:  "lookup [search] [tag]",
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		company, err := company.Find(args[0])
+		companySearchString := args[0]
+		filingStringSearch := args[1]
+
+		company, err := company.Find(companySearchString)
 		if err != nil {
 			panic(err)
 		}
@@ -25,9 +28,8 @@ var LookupCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		
 
-		filings := submissions.GetFilings("10-K")
+		filings := submissions.GetFilings(filingStringSearch)
 
 		// fd, _ := json.Marshal(filings)
 		// fmt.Println(string(fd))
