@@ -1,51 +1,16 @@
 package request
 
 import (
-	"bytes"
 	"fmt"
-	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
-	"path"
 
-	"github.com/Reggles44/secli/internal/cache"
 	"github.com/spf13/viper"
 )
 
-func MakeUrl(tpl template.Template, data any) string {
-	var buf bytes.Buffer
-	tpl.Execute(&buf, data)
-	return buf.String()
-}
-
-// TODO: Create requests per second limitation
-func Get(method string, url string, cacheDuration int) (*[]byte, error) {
-	// Read from cache
-	data, err := cache.Read(cacheFilePath, cacheDuration)
-	
-	// If we could not read from cache
-	if err != nil {
-
-		// Fetch data
-		data, err := execute(method, url)
-		if err != nil {
-			return nil, err
-		}
-
-		// Write to cache
-		go cache.Write(cacheFileName, data)
-	}
-
-	return data, nil
-}
-
-func DownloadFile(method string, url string) (string, error) {
-	data, err := cache.Read(cacheFilePath, -1)
-}
-
-func execute(method string, url string) (*[]byte, error) {
+func Do(method string, url string) ([]byte, error) {
 	// Create Request
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
@@ -81,9 +46,5 @@ func execute(method string, url string) (*[]byte, error) {
 	}
 
 	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &data, nil
+	return data, err
 }

@@ -1,6 +1,8 @@
 package lookup
 
 import (
+	"fmt"
+
 	"github.com/Reggles44/secli/internal/company"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +21,7 @@ var LookupCmd = &cobra.Command{
 			panic(err)
 		}
 
-		// fmt.Println(company.CIK)
+		fmt.Println(company.CIK)
 
 		submissions, err := company.LatestSubmission()
 		if err != nil {
@@ -32,10 +34,18 @@ var LookupCmd = &cobra.Command{
 		// fmt.Println(string(fd))
 
 		for _, filing := range filings {
-			_, err := filing.GetFilingDocuments()
+
+			files, err := filing.GetFilingDocuments()
 			if err != nil {
 				panic(err)
 			}
+
+			filesNames := []string{}
+			for fn := range files {
+				filesNames = append(filesNames, fn)
+			}
+
+
 		}
 	},
 }

@@ -5,15 +5,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Reggles44/secli/internal/utils/request"
+	"github.com/Reggles44/secli/internal/cache"
 )
 
 var (
-	filingUrl           = "https://www.sec.gov/Archives/edgar/data/%v/%v/%v"
+	filingUrl           = "https://www.sec.gov/Archives/edgar/data/%v/%v/%v-xbrl.zip"
 	filingCacheDuration = -1
 )
 
-type FilingMeta struct {
+type Filing struct {
 	CIK                   string
 	AccessionNumber       string
 	FilingDate            time.Time
@@ -34,16 +34,19 @@ type FilingMeta struct {
 
 type FilingData struct{}
 
-func (f FilingMeta) GetFilingDocuments() (*[]byte, error) {
-	url := fmt.Sprintf(filingUrl, f.CIK, strings.ReplaceAll(f.AccessionNumber, "-", ""), f.PrimaryDocument)
-	files, err := request.GetZip("GET", url, filingCacheDuration)
+func (f Filing) GetFilingDocuments() (map[string]*[]byte, error) {
+	url := fmt.Sprintf(
+		filingUrl,
+		f.CIK,
+		strings.ReplaceAll(f.AccessionNumber, "-", ""),
+		f.AccessionNumber,
+	)
+
+	filingCache := cache.ZipCache{URL: url}
+	filings, err := filingCache.Read()
 	if err != nil {
 		return nil, err
 	}
 
-	for fileName := range files {
-		fmt.Println(fileName)
-	}
-
-	return nil, nil
+	return filings, nil
 }

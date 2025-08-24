@@ -4,23 +4,18 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/Reggles44/secli/internal/utils/request"
-)
-
-var (
-	companyIndexUrl           = "https://www.sec.gov/files/company_tickers_exchange.json"
-	companyIndexCacheDuration = 86400
+	"github.com/Reggles44/secli/internal/cache"
 )
 
 type CompanyIndex struct {
 	Fields []string            `json:"fields"`
-	Data   []CompanyIndexEntry `json"data"`
+	Data   []CompanyIndexEntry `json:"data"`
 }
 
 type CompanyIndexEntry struct {
-	CIK      int
-	Name     string
-	Ticker   string
+	CIK    int
+	Name   string
+	Ticker string
 	// Exchange string
 }
 
@@ -39,18 +34,22 @@ func (cie *CompanyIndexEntry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+var indexCache = cache.FileCache[CompanyIndex]{
+	URL:      "https://www.sec.gov/files/company_tickers_exchange.json",
+	FileName: "index.json",
+	Duration: 86400,
+}
+var index CompanyIndex
+
+func init() {
+	i, err := indexCache.Read()
+	if err != nil {
+		panic(err)
+	}
+	index = i
+}
+
 func Find(search string) (CompanyIndexEntry, error) {
-	resp, err := request.Get("GET", companyIndexUrl, companyIndexCacheDuration)
-	if err != nil {
-		panic(err)
-	}
-
-	var index CompanyIndex
-	err = json.Unmarshal(*resp, &index)
-	if err != nil {
-		panic(err)
-	}
-
 	for _, entry := range index.Data {
 		if entry.Name == search || entry.Ticker == search {
 			return entry, nil

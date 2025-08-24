@@ -1,18 +1,12 @@
 package companysubmission
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 	"time"
 
+	"github.com/Reggles44/secli/internal/cache"
 	"github.com/Reggles44/secli/internal/company/filing"
-	"github.com/Reggles44/secli/internal/utils/request"
-)
-
-var (
-	companySubmissionUrl           = "https://data.sec.gov/submissions/CIK%010d.json"
-	companySubmissionCacheDuration = 0
 )
 
 type CompanySubmissions struct {
@@ -80,20 +74,15 @@ type CompanySubmissions struct {
 }
 
 func Get(cik int) (CompanySubmissions, error) {
-	url := fmt.Sprintf(companySubmissionUrl, cik)
-	data, err := request.Get("GET", url, companySubmissionCacheDuration)
-	if err != nil {
-		return CompanySubmissions{}, err
-	}
-
-	var submission CompanySubmissions
-	json.Unmarshal(*data, &submission)
-
-	return submission, nil
+	url := fmt.Sprintf("https://data.sec.gov/submissions/CIK%010d.json", cik)
+	return cache.FileCache[CompanySubmissions]{
+		URL:      url,
+		Duration: -1,
+	}.Read()
 }
 
-func (s CompanySubmissions) GetFilings(formSearch string) []filing.FilingMeta {
-	var filings []filing.FilingMeta
+func (s CompanySubmissions) GetFilings(formSearch string) []filing.Filing {
+	var filings []filing.Filing
 
 	for i, form := range s.Filings.Recent.Form {
 		if form == formSearch {
@@ -112,7 +101,7 @@ func (s CompanySubmissions) GetFilings(formSearch string) []filing.FilingMeta {
 				continue
 			}
 
-			f := filing.FilingMeta{
+			f := filing.Filing{
 				CIK:                   s.Cik,
 				AccessionNumber:       s.Filings.Recent.AccessionNumber[i],
 				FilingDate:            filingDate,

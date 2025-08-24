@@ -1,16 +1,11 @@
 package companyfacts
 
 import (
-	"encoding/json"
 	"fmt"
 
-	"github.com/Reggles44/secli/internal/utils/request"
+	"github.com/Reggles44/secli/internal/cache"
 )
 
-var (
-	companyFactsURL           = "https://data.sec.gov/api/xbrl/companyfacts/CIK%010d.json"
-	companyFactsCacheDuration = 86400
-)
 
 type CompanyFacts struct {
 	DEI    map[string]Fact `json:"dei"`
@@ -34,17 +29,7 @@ type Value struct {
 }
 
 func Get(cik int) (CompanyFacts, error) {
-	url := fmt.Sprintf(companyFactsURL, cik)
-	data, err := request.Get("GET", url, companyFactsCacheDuration)
-	if err != nil {
-		return CompanyFacts{}, nil
-	}
-
-	var company CompanyFacts
-	err = json.Unmarshal(*data, &company)
-	if err != nil {
-		return CompanyFacts{}, nil
-	}
-
-	return company, nil
+	url := fmt.Sprintf("https://data.sec.gov/api/xbrl/companyfacts/CIK%010d.json", cik)
+	factsCache := cache.FileCache[CompanyFacts]{URL: url, Duration: 86400}
+	return factsCache.Read()
 }
