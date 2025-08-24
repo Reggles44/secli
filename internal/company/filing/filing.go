@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Reggles44/secli/internal/cache"
+	"github.com/Reggles44/secli/internal/xbrl"
 )
 
 var (
@@ -30,9 +31,8 @@ type Filing struct {
 	IsInlineXBRL          int8
 	PrimaryDocument       string
 	PrimaryDocDescription string
+	Documents             map[string]*[]byte
 }
-
-type FilingData struct{}
 
 func (f Filing) GetFilingDocuments() (map[string]*[]byte, error) {
 	url := fmt.Sprintf(
@@ -47,6 +47,8 @@ func (f Filing) GetFilingDocuments() (map[string]*[]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	xbrl.XBRLRaw{}.Create(filings)
 
 	return filings, nil
 }

@@ -5,6 +5,7 @@ go 1.24.5
 require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
+	golang.org/x/net v0.33.0
 )
 
 require (
