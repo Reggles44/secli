@@ -25,6 +25,6 @@ func (c Company) LatestSubmission() (companysubmission.CompanySubmissions, error
 	return companysubmission.Get(c.CIK)
 }
 
-func (c Company) Facts() (companyfacts.CompanyFacts, error) {
+func (c Company) Facts() (companyfacts.Facts, error) {
 	return companyfacts.Get(c.CIK)
 }
