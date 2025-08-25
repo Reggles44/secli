@@ -3,6 +3,7 @@ package companyindex
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/Reggles44/secli/internal/cache"
 )
@@ -51,7 +52,7 @@ func init() {
 
 func Find(search string) (CompanyIndexEntry, error) {
 	for _, entry := range index.Data {
-		if entry.Name == search || entry.Ticker == search {
+		if strings.EqualFold(entry.Name, search) || strings.EqualFold(entry.Ticker, search) {
 			return entry, nil
 		}
 	}

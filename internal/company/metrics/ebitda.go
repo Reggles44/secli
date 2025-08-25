@@ -8,7 +8,7 @@ import (
 
 
 
-func EBITDA(c company.Company) ([]float32, error) {
+func EBITDA(c company.Company, form string) ([]float32, error) {
 	var results []float32
 
 	facts, err := c.Facts()
@@ -16,22 +16,16 @@ func EBITDA(c company.Company) ([]float32, error) {
 		return nil, err
 	}
 
-	operatingIncome, err := facts.Find("OperatingIncomeLoss", "10-Q")
-	if err != nil {
-		return nil, err
+	result := facts.Find(form, "OperatingIncomeLoss", "DepreciationAndAmortization")
+
+	for accn, fields := range result {
+		operatingIncome := fields["OperatingIncomeLoss"]
+		depreciationAmortization := fields["DepreciationAndAmortization"]
+
+		ebidta := operatingIncome.Value + depreciationAmortization.Value
+
+		fmt.Printf("%v EBIDTA=%v\n", accn, ebidta)
 	}
-
-	depreciationAndAmortization, err := facts.Find("DepreciationAndAmortization", "10-Q")
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Printf("ACCN=%v (%v-%v) %v", )
-
-
-	
-
 	
 	return results, nil
-
 }

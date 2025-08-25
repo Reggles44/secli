@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Reggles44/secli/cmd/calc"
 	"github.com/Reggles44/secli/cmd/debug"
 	"github.com/Reggles44/secli/cmd/lookup"
 	"github.com/Reggles44/secli/cmd/preload"
@@ -36,6 +37,7 @@ func init() {
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 
 	// Add Sub Commands
+	rootCmd.AddCommand(calc.CalcCmd)
 	rootCmd.AddCommand(debug.DebugCmd)
 	rootCmd.AddCommand(lookup.LookupCmd)
 	rootCmd.AddCommand(preload.PreloadCmd)

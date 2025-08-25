@@ -1,9 +1,7 @@
 package facts
 
 import (
-	"errors"
 	"fmt"
-	"time"
 
 	"github.com/Reggles44/secli/internal/cache"
 )
@@ -17,7 +15,7 @@ type Facts struct {
 type Fact struct {
 	Description string  `json:"description"`
 	Label       string  `json:"label"`
-	Units       []Value `json:"units"`
+	Units       map[string][]Value `json:"units"`
 }
 
 type Value struct {
@@ -37,35 +35,9 @@ type Value struct {
 	Value float64 `json:"val"`
 }
 
-
 func Get(cik int) (Facts, error) {
 	return cache.FileCache[Facts]{
 		URL:      fmt.Sprintf("https://data.sec.gov/api/xbrl/companyfacts/CIK%010d.json", cik),
 		Duration: 86400,
 	}.Read()
-}
-
-func (f Facts) Find(field string, form string) ([]Value, error) {
-	var values []Value
-
-	for _, fmap := range f.Data {
-		for f, vlist := range fmap {
-			if f == field {
-
-				for _, v := range vlist.Units {
-					start, _ := time.Parse("2006-01-02", v.Start)
-					end, _ := time.Parse("2006-01-02", v.Start)
-					
-					duration := end.Sub(start)
-					if v.Form == form{
-						values = append(values, v)
-					}
-				}
-
-				return values, nil
-			}
-		}
-	}
-
-	return values, errors.New("could not find field")
 }
