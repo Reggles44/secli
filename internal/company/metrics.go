@@ -12,3 +12,9 @@ type Metric struct {
 func (m Metric) Calculate(c Company) map[Doc]float64 { 
 
 }
+
+
+func (d Doc) PeRatio() (float64, error) {
+}
+
+func MakeMetric()

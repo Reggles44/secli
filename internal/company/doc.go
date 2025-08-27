@@ -22,6 +22,7 @@ type Doc struct {
 	// Data
 	DEI    Taxonomy
 	USGaap Taxonomy
+	Other map[string]Taxonomy
 }
 
 type Taxonomy struct {
@@ -70,12 +71,36 @@ func (c Company) Docs() ([]Doc, error) {
 
 	err = json.Unmarshal(b, &docs)
 
-	var docAccnMap = make(map[string]Doc)
+	docAccnMap := make(map[string]Doc)
 	for _, doc := range docs {
 		docAccnMap[doc.AccessionNumber] = doc
 	}
 
 	// Add facts to docs
+	for taxonomy, fields := range facts.Facts {
+		for fieldName, field := range fields {
+			for units, values := range field.Units {
+				for _, v := range values {
+
+					// Access Doc
+					doc, ok := docAccnMap[v.ACCN]
+					if ok {
+						var docTaxonomy *Taxonomy
+						if taxonomy == "dei" {
+							docTaxonomy = &doc.DEI
+						} else if taxonomy == "us-gaap" {
+							docTaxonomy = &doc.USGaap
+						} else {
+							docTaxonomy = &make(Taxonomy{})
+							doc.Other[taxonomy] = *docTaxonomy
+						}
+
+					}
+					
+				}
+			}
+		}
+	}
 	for fieldType, fieldMap := range facts.Data {
 		for fieldName, fact := range fieldMap {
 			for unit, values := range fact.Units {
