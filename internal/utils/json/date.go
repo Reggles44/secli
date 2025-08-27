@@ -2,8 +2,7 @@ package jsonutil
 
 import "time"
 
-
-type DateOnly time.Time
+type DateOnly struct{ time.Time }
 
 func (d *DateOnly) UnmarshalJSON(b []byte) error {
 	date, err := time.Parse(time.DateOnly, string(b))
@@ -11,6 +10,6 @@ func (d *DateOnly) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*d = DateOnly(date)
+	d.Time = date
 	return nil
 }

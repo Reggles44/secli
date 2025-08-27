@@ -2,6 +2,8 @@ package company
 
 import (
 	"encoding/json"
+	"sort"
+	"time"
 
 	jsonutil "github.com/Reggles44/secli/internal/utils/json"
 )
@@ -16,6 +18,27 @@ type Doc struct {
 	FilmNumber            string            `json:"filmNumber"`
 	PrimaryDocument       string            `json:"primaryDocument"`
 	PrimaryDocDescription string            `json:"primaryDocDescription"`
+
+	// Data
+	DEI    Taxonomy
+	USGaap Taxonomy
+}
+
+type Taxonomy struct {
+	Fields map[string]Field
+}
+
+type Field struct {
+	Name        string
+	Label       string
+	Description string
+	Values      []Value
+}
+
+type Value struct {
+	Unit       string
+	FilingDate time.Time
+	Value      float64
 }
 
 func (c Company) Docs() ([]Doc, error) {
@@ -25,7 +48,12 @@ func (c Company) Docs() ([]Doc, error) {
 	if err != nil {
 		return nil, err
 	}
+	facts, err := c.Facts()
+	if err != nil {
+		return nil, err
+	}
 
+	// Assemble Doc
 	var dm []map[string]string
 	for i := range len(submission.Filings.Recent["form"]) {
 		fields := make(map[string]string)
@@ -41,5 +69,30 @@ func (c Company) Docs() ([]Doc, error) {
 	}
 
 	err = json.Unmarshal(b, &docs)
+
+	var docAccnMap = make(map[string]Doc)
+	for _, doc := range docs {
+		docAccnMap[doc.AccessionNumber] = doc
+	}
+
+	// Add facts to docs
+	for fieldType, fieldMap := range facts.Data {
+		for fieldName, fact := range fieldMap {
+			for unit, values := range fact.Units {
+				for _, v := range values {
+					doc, ok := docAccnMap[v.ACCN]
+					if ok {
+						if fieldType == "DEI" {
+							doc.DEI[fieldName] = v
+						}
+					}
+				}
+			}
+		}
+	}
+
+	sort.Slice(docs, func(i int, j int) bool {
+		return docs[i].ReportDate.Before(docs[j].ReportDate.Time)
+	})
 	return docs, err
 }
