@@ -80,7 +80,7 @@ func createDocs(c Company) ([]Doc, error) {
 	return docs, err
 }
 
-func populateDocs(c Company, docs *[]Doc) error {
+func populateDocs(c Company, docs *[]Doc) error {:w http.ResponseWriter, r *http.Request
 	docAccnMap := make(map[string]*Doc)
 	for _, doc := range *docs {
 		docAccnMap[doc.AccessionNumber] = &doc
@@ -92,13 +92,18 @@ func populateDocs(c Company, docs *[]Doc) error {
 	}
 
 	for _, doc := range *docs {
-		doc.DEI, err = taxonomy.ConvertDEI(facts.DEI, FactFieldToDocField)
+		convert := func (from FactsField) (DocField, error) {
+			for _, fv := range from.Units.USD {
+				if fv.ACCN == doc.AccessionNumber {
+					return DocField{}
+				}
+			}
+		}
+
+		doc.DEI, err = taxonomy.ConvertDEI(facts.DEI, convert)
 	}
 
 
 	return nil
 }
 
-func FactFieldToDocField(from FactsField) (DocField, error) {
-
-}
