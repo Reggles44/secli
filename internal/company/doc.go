@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/Reggles44/secli/internal/taxonomy"
 	jsonutil "github.com/Reggles44/secli/internal/utils/json"
 )
 
@@ -19,37 +20,39 @@ type Doc struct {
 	PrimaryDocument       string            `json:"primaryDocument"`
 	PrimaryDocDescription string            `json:"primaryDocDescription"`
 
-	// Data
-	DEI    Taxonomy
-	USGaap Taxonomy
-	Other map[string]Taxonomy
+	DEI    taxonomy.DEI[DocField]    `json:"dei"`
+	Invest taxonomy.Invest[DocField] `json:"invest"`
+	SRT    taxonomy.SRT[DocField]    `json:"srt"`
+	USGaap taxonomy.USGaap[DocField] `json:"us-gaap"`
 }
 
-type Taxonomy struct {
-	Fields map[string]Field
+type DocField struct {
+	Label          string
+	Description    string
+	QuarterlyValue DocValue
+	YearlyValue    DocValue
 }
 
-type Field struct {
-	Name        string
-	Label       string
-	Description string
-	Values      []Value
-}
-
-type Value struct {
+type DocValue struct {
 	Unit       string
 	FilingDate time.Time
 	Value      float64
 }
 
 func (c Company) Docs() ([]Doc, error) {
-	var docs []Doc
-
-	submission, err := c.LatestSubmission()
+	docs, err := createDocs(c)
 	if err != nil {
 		return nil, err
 	}
-	facts, err := c.Facts()
+
+	err = populateDocs(c, &docs)
+	return docs, err
+}
+
+func createDocs(c Company) ([]Doc, error) {
+	var docs []Doc
+
+	submission, err := c.LatestSubmission()
 	if err != nil {
 		return nil, err
 	}
@@ -71,53 +74,31 @@ func (c Company) Docs() ([]Doc, error) {
 
 	err = json.Unmarshal(b, &docs)
 
-	docAccnMap := make(map[string]Doc)
-	for _, doc := range docs {
-		docAccnMap[doc.AccessionNumber] = doc
-	}
-
-	// Add facts to docs
-	for taxonomy, fields := range facts.Facts {
-		for fieldName, field := range fields {
-			for units, values := range field.Units {
-				for _, v := range values {
-
-					// Access Doc
-					doc, ok := docAccnMap[v.ACCN]
-					if ok {
-						var docTaxonomy *Taxonomy
-						if taxonomy == "dei" {
-							docTaxonomy = &doc.DEI
-						} else if taxonomy == "us-gaap" {
-							docTaxonomy = &doc.USGaap
-						} else {
-							docTaxonomy = &make(Taxonomy{})
-							doc.Other[taxonomy] = *docTaxonomy
-						}
-
-					}
-					
-				}
-			}
-		}
-	}
-	for fieldType, fieldMap := range facts.Data {
-		for fieldName, fact := range fieldMap {
-			for unit, values := range fact.Units {
-				for _, v := range values {
-					doc, ok := docAccnMap[v.ACCN]
-					if ok {
-						if fieldType == "DEI" {
-							doc.DEI[fieldName] = v
-						}
-					}
-				}
-			}
-		}
-	}
-
 	sort.Slice(docs, func(i int, j int) bool {
 		return docs[i].ReportDate.Before(docs[j].ReportDate.Time)
 	})
 	return docs, err
+}
+
+func populateDocs(c Company, docs *[]Doc) error {
+	docAccnMap := make(map[string]*Doc)
+	for _, doc := range *docs {
+		docAccnMap[doc.AccessionNumber] = &doc
+	}
+
+	facts, err := c.Facts()
+	if err != nil {
+		return err
+	}
+
+	for _, doc := range *docs {
+		doc.DEI, err = taxonomy.ConvertDEI(facts.DEI, FactFieldToDocField)
+	}
+
+
+	return nil
+}
+
+func FactFieldToDocField(from FactsField) (DocField, error) {
+
 }
