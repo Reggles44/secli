@@ -7,7 +7,7 @@ import (
 )
 
 func EPS(d *docs.Doc) (float64, error) {
-	netIncome, err := d.Taxonomy.USGaap.NetIncomeLoss.YearlyValue()
+	netIncome, err := d.Taxonomy.USGaap.NetIncomeLoss.QuarterlyValue()
 	if err != nil {
 		return 0, err
 	}
