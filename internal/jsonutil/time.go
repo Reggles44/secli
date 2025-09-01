@@ -1,6 +1,11 @@
 package jsonutil
 
-import "time"
+import (
+	"strings"
+	"time"
+)
+
+const ISO8601 = "2006-01-02T15:04:05-0700Z"
 
 var TimeLayouts = []string{
 	// time.Layout     ,//01/02 03:04:05PM '06 -0700 // The reference time, in numerical order.
@@ -23,16 +28,22 @@ var TimeLayouts = []string{
 	time.DateTime, // 2006-01-02 15:04:05
 	time.DateOnly, // 2006-01-02
 	// time.TimeOnly  ,//15:04:05
+	ISO8601,
 }
 
 type Time struct{ time.Time }
 
 func (d *Time) UnmarshalJSON(b []byte) error {
 	var err error
+
+	value := strings.ReplaceAll(string(b), "\"", "")
+	if value == "" {
+		return nil
+	}
+
 	for _, layout := range TimeLayouts {
-		t, err := time.Parse(layout, string(b))
+		d.Time, err = time.Parse(layout, value)
 		if err == nil {
-			d.Time = t
 			return nil
 		}
 	}

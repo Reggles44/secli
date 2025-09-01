@@ -26,14 +26,18 @@ var CalcCmd = &cobra.Command{
 			panic(err)
 		}
 
-		latestTenK := docs[forms.TenK][0]
+		latestTenK := docs[forms.TenQ][0]
 		if err := latestTenK.Fill(); err != nil {
 			panic(err)
 		}
 
-		fmt.Println(latestTenK.AccessionNumber)
+		// fmt.Println(latestTenK.AccessionNumber)
+		// fmt.Printf("Net Income Loss %+v\n", latestTenK.Taxonomy.USGaap.NetIncomeLoss)
 
-		eps := metrics.EPS(latestTenK)
+		eps, err := metrics.EPS(latestTenK)
+		if err != nil {
+			panic(err)
+		}
 		fmt.Println(eps)
 	},
 }

@@ -42,7 +42,6 @@ func createDocs(cik int) (map[forms.Form][]*Doc, error) {
 	})
 
 	docMap := make(map[forms.Form][]*Doc)
-
 	for _, doc := range docs {
 		docMap[doc.Form] = append(docMap[doc.Form], doc)
 	}
