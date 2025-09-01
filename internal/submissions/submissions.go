@@ -1,8 +1,6 @@
-package company
+package submissions
 
 import (
-	"fmt"
-
 	"github.com/Reggles44/secli/internal/cache"
 )
 
@@ -44,7 +42,7 @@ type Submissions struct {
 	Flags       string   `json:"flags"`
 	FormerNames []string `json:"formerNames"`
 	Filings     struct {
-		Recent map[string][]string `json:"recent"`
+		Recent map[string][]interface{} `json:"recent"`
 		// Recent struct {
 		// 	AccessionNumber       []string `json:"accessionNumber"`
 		// 	FilingDate            []string `json:"filingDate"`
@@ -71,10 +69,10 @@ type Submissions struct {
 	} `json:"filings"`
 }
 
-func (c Company) LatestSubmission() (Submissions, error) {
-	url := fmt.Sprintf("https://data.sec.gov/submissions/CIK%010d.json", c.CIK)
-	return cache.FileCache[Submissions]{
-		URL:      url,
-		Duration: -1,
-	}.Read()
+var submissions = &cache.Cache[Submissions]{
+	URL: "https://data.sec.gov/submissions/CIK%010d.json",
+}
+
+func Latest(cik int) (*Submissions, error) {
+	return submissions.Read(cik)
 }

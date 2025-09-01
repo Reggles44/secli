@@ -4,28 +4,36 @@ import (
 	"fmt"
 
 	"github.com/Reggles44/secli/internal/company"
-	"github.com/Reggles44/secli/internal/company/metrics"
+	"github.com/Reggles44/secli/internal/forms"
+	"github.com/Reggles44/secli/internal/metrics"
 	"github.com/spf13/cobra"
 )
 
 var CalcCmd = &cobra.Command{
 	Use:  "calc [search] ",
-	Args: cobra.MinimumNArgs(3),
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		// method := args[0]
-		compSearch := args[1]
-		form := args[2]
+		compSearch := args[0]
 
 		c, err := company.Find(compSearch)
 		if err != nil {
 			panic(err)
 		}
 
-		result, err := metrics.EBITDA(c, form)
+		docs, err := c.Docs()
 		if err != nil {
 			panic(err)
 		}
 
-		fmt.Println(result)
+		latestTenK := docs[forms.TenK][0]
+		if err := latestTenK.Fill(); err != nil {
+			panic(err)
+		}
+
+		fmt.Println(latestTenK.AccessionNumber)
+
+		eps := metrics.EPS(latestTenK)
+		fmt.Println(eps)
 	},
 }
